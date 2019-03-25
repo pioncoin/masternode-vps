@@ -120,12 +120,12 @@ function install_packages() {
     libboost-all-dev libssl-dev make autoconf libtool git apt-utils g++ \
     libprotobuf-dev pkg-config libudev-dev libqrencode-dev bsdmainutils \
     pkg-config libgmp3-dev libevent-dev jp2a pv virtualenv libdb4.8-dev libdb4.8++-dev  &>> ${SCRIPT_LOGFILE}
-    
+
     # only for 18.04 // openssl
     if [[ "${VERSION_ID}" == "18.04" ]] ; then
        apt-get -qqy -o=Dpkg::Use-Pty=0 -o=Acquire::ForceIPv4=true install libssl1.0-dev
-    fi    
-    
+    fi
+
 }
 
 #
@@ -201,7 +201,7 @@ function create_sentinel_setup() {
 		git pull                      &>> ${SCRIPT_LOGFILE}
 		rm -f rm sentinel.conf        &>> ${SCRIPT_LOGFILE}
 	fi
-	
+
 	# create a globally accessible venv and install sentinel requirements
 	virtualenv --system-site-packages ${SENTINEL_ENV}      &>> ${SCRIPT_LOGFILE}
 	${SENTINEL_ENV}/bin/pip install -r requirements.txt    &>> ${SCRIPT_LOGFILE}
@@ -209,7 +209,7 @@ function create_sentinel_setup() {
     # create one sentinel config file per masternode
 	for NUM in $(seq 1 ${count}); do
 	    if [ ! -f "${SENTINEL_BASE}/${CODENAME}${NUM}_sentinel.conf" ]; then
-	         echo "* Creating sentinel configuration for ${CODENAME} masternode number ${NUM}" &>> ${SCRIPT_LOGFILE}    
+	         echo "* Creating sentinel configuration for ${CODENAME} masternode number ${NUM}" &>> ${SCRIPT_LOGFILE}
 		     echo "pion_conf=${MNODE_CONF_BASE}/${CODENAME}_n${NUM}.conf"            > ${SENTINEL_BASE}/${CODENAME}${NUM}_sentinel.conf
              echo "network=mainnet"                                                  >> ${SENTINEL_BASE}/${CODENAME}${NUM}_sentinel.conf
              echo "db_name=${SENTINEL_BASE}/database/${CODENAME}_${NUM}_sentinel.db" >> ${SENTINEL_BASE}/${CODENAME}${NUM}_sentinel.conf
@@ -589,27 +589,9 @@ function build_mn_from_source() {
                 mkdir ${CODENAME}                        &>> ${SCRIPT_LOGFILE}
                 wget https://github.com/pioncoin/pion/releases/download/v0.12.3.3/pioncore-0.12.3-x86_64-linux-gnu.tar.gz                    &>> ${SCRIPT_LOGFILE}
                 tar -xvzf pioncore-0.12.3-x86_64-linux-gnu.tar.gz  -C  ${SCRIPTPATH}/${CODE_DIR}/${CODENAME}                &>> ${SCRIPT_LOGFILE}
-                cd pion/bin              &>> ${SCRIPT_LOGFILE}
-                ln -s piond /usr/local/bin/piond                    &>> ${SCRIPT_LOGFILE}
-                ln -s pion-cli /usr/local/bin/pion-cli                    &>> ${SCRIPT_LOGFILE}
-                ln -s pion-tx /usr/local/bin/pion-tx                    &>> ${SCRIPT_LOGFILE}
-                echo "Symlinked prebuilt Pion 0.12.3 binaries to /usr/local/bin "
-                # cd ${SCRIPTPATH}/${CODE_DIR}/${CODENAME}            &>> ${SCRIPT_LOGFILE}
-                # echo "* Checking out desired GIT tag: ${release}"
-                # git checkout ${release}                             &>> ${SCRIPT_LOGFILE}
 
-                # if [ "$update" -eq 1 ]; then
-                #     echo "update given, deleting the old daemon NOW!" &>> ${SCRIPT_LOGFILE}
-                #     rm -f ${MNODE_DAEMON}
-                #     # old daemon must be removed before compilation. Would be better to remove it afterwards, however not possible with current structure
-                #     if [ -f ${MNODE_DAEMON} ]; then
-                #             echo "UPDATE FAILED! Daemon ${MNODE_DAEMON} couldn't be removed. Please open an issue at https://github.com/masternodes/vps/issues. Thank you!"
-                #             exit 1
-                #     fi
-                # fi
-
-                # compilation starts here
-                # source ${SCRIPTPATH}/config/${CODENAME}/${CODENAME}.compile | pv -t -i0.1
+                cp ${SCRIPTPATH}/${CODE_DIR}/${CODENAME}/pioncore-0.12.3/bin/* /usr/local/bin/ &>> ${SCRIPT_LOGFILE}
+                echo "Copied prebuilt Pion 0.12.3 binaries to /usr/local/bin " &>> ${SCRIPT_LOGFILE}
         else
                 echo "* Daemon already in place at ${MNODE_DAEMON}, not compiling"
         fi
