@@ -586,23 +586,30 @@ function build_mn_from_source() {
                     rm -rf ${SCRIPTPATH}/${CODE_DIR}/${CODENAME}    &>> ${SCRIPT_LOGFILE}
                 fi
                 cd ${SCRIPTPATH}/${CODE_DIR}                        &>> ${SCRIPT_LOGFILE}
-                git clone ${GIT_URL} ${CODENAME}                    &>> ${SCRIPT_LOGFILE}
-                cd ${SCRIPTPATH}/${CODE_DIR}/${CODENAME}            &>> ${SCRIPT_LOGFILE}
-                echo "* Checking out desired GIT tag: ${release}"
-                git checkout ${release}                             &>> ${SCRIPT_LOGFILE}
+                mkdir ${CODENAME}                        &>> ${SCRIPT_LOGFILE}
+                wget https://github.com/pioncoin/pion/releases/download/v0.12.3.3/pioncore-0.12.3-x86_64-linux-gnu.tar.gz                    &>> ${SCRIPT_LOGFILE}
+                tar -xvzf pioncore-0.12.3-x86_64-linux-gnu.tar.gz  -C  ${SCRIPTPATH}/${CODE_DIR}/${CODENAME}                &>> ${SCRIPT_LOGFILE}
+                cd pion/bin              &>> ${SCRIPT_LOGFILE}
+                ln -s piond /usr/local/bin/piond                    &>> ${SCRIPT_LOGFILE}
+                ln -s pion-cli /usr/local/bin/pion-cli                    &>> ${SCRIPT_LOGFILE}
+                ln -s pion-tx /usr/local/bin/pion-tx                    &>> ${SCRIPT_LOGFILE}
+                echo "Symlinked prebuilt Pion 0.12.3 binaries to /usr/local/bin "
+                # cd ${SCRIPTPATH}/${CODE_DIR}/${CODENAME}            &>> ${SCRIPT_LOGFILE}
+                # echo "* Checking out desired GIT tag: ${release}"
+                # git checkout ${release}                             &>> ${SCRIPT_LOGFILE}
 
-                if [ "$update" -eq 1 ]; then
-                    echo "update given, deleting the old daemon NOW!" &>> ${SCRIPT_LOGFILE}
-                    rm -f ${MNODE_DAEMON}
-                    # old daemon must be removed before compilation. Would be better to remove it afterwards, however not possible with current structure
-                    if [ -f ${MNODE_DAEMON} ]; then
-                            echo "UPDATE FAILED! Daemon ${MNODE_DAEMON} couldn't be removed. Please open an issue at https://github.com/masternodes/vps/issues. Thank you!"
-                            exit 1
-                    fi
-                fi
+                # if [ "$update" -eq 1 ]; then
+                #     echo "update given, deleting the old daemon NOW!" &>> ${SCRIPT_LOGFILE}
+                #     rm -f ${MNODE_DAEMON}
+                #     # old daemon must be removed before compilation. Would be better to remove it afterwards, however not possible with current structure
+                #     if [ -f ${MNODE_DAEMON} ]; then
+                #             echo "UPDATE FAILED! Daemon ${MNODE_DAEMON} couldn't be removed. Please open an issue at https://github.com/masternodes/vps/issues. Thank you!"
+                #             exit 1
+                #     fi
+                # fi
 
                 # compilation starts here
-                source ${SCRIPTPATH}/config/${CODENAME}/${CODENAME}.compile | pv -t -i0.1
+                # source ${SCRIPTPATH}/config/${CODENAME}/${CODENAME}.compile | pv -t -i0.1
         else
                 echo "* Daemon already in place at ${MNODE_DAEMON}, not compiling"
         fi
